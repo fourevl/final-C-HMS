@@ -347,7 +347,7 @@ bool validatePhone(const char *phone, char *validatedPhone, size_t bufferSize) {
     }
   }
 
-  if (digitCount != 10 || digitCount != 11) {
+  if (digitCount != 10 && digitCount != 11) {
     printf(
         "Invalid phone number format. Please enter a 10 or 11 digit number.\n");
     return false;
