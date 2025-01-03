@@ -782,6 +782,51 @@ void calculateTotalAmount(Booking *booking) {
   }
 }
 
+double calculateTotalAmount2(Booking *booking) {
+  struct tm checkIn = {0}, checkOut = {0};
+  time_t checkInTime, checkOutTime;
+  double seconds;
+  double totalAmount;
+
+  // Manually parse the date strings into struct tm
+  parseDate(booking->checkIn, &checkIn);
+  parseDate(booking->checkOut, &checkOut);
+
+  // Convert struct tm to time_t
+  checkInTime = mktime(&checkIn);
+  checkOutTime = mktime(&checkOut);
+
+  if (checkInTime == -1 || checkOutTime == -1) {
+    fprintf(stderr, "Error converting dates to time_t.\n");
+    return 0;
+  }
+
+  // Calculate the difference in seconds
+  seconds = difftime(checkOutTime, checkInTime);
+
+  // Convert seconds to days using long long
+  long long days = seconds / (60 * 60 * 24);
+
+  if (days < 0) {
+    days = 0; // Handle negative days (you might want to prevent this earlier)
+  }
+
+  // Find the room and calculate total amount
+  bool roomFound = false;
+  for (int i = 0; i < roomCount; i++) {
+    if (rooms[i].id == booking->roomId) {
+      totalAmount = (double)rooms[i].price * days;
+      roomFound = true;
+      break;
+    }
+  }
+
+  if (!roomFound) {
+    fprintf(stderr, "Error: Room with ID %d not found.\n", booking->roomId);
+  }
+  return totalAmount;
+}
+
 void makeBooking() {
   if (bookingCount >= MAX_BOOKINGS) {
     printf("\nMaximum booking capacity reached!\n");
@@ -846,10 +891,13 @@ void makeBooking() {
   newBooking.userId = currentUser.id;
   newBooking.status = 1;
 
+  printf("DEBUG: bookingCount before adding: %d\n", bookingCount);
+
   // Add the booking to the array and increment the count
   bookings[bookingCount++] = newBooking;
 
   // Save data immediately after updating the room status and adding the booking
+  printf("DEBUG: bookingCount after adding: %d\n", bookingCount);
   saveData();
 
   // Calculate the total amount after saving the data
@@ -857,6 +905,7 @@ void makeBooking() {
       &bookings[bookingCount - 1]); // Use bookingCount - 1 as the index
 
   printf("\nBooking successful!\n");
+
   printf("Total amount: $%.2f\n", bookings[bookingCount - 1].totalAmount);
 }
 
@@ -869,8 +918,11 @@ void viewBookings() {
         bookings[i].userId != currentUser.id) {
       continue;
     }
+    double totalAmount = calculateTotalAmount2(
+        &bookings[i]); // Call the function and get the returned value
     printf("%d\t%d\t%s\t%s\t%.2f\t%s\n", bookings[i].id, bookings[i].roomId,
-           bookings[i].checkIn, bookings[i].checkOut, bookings[i].totalAmount,
+           bookings[i].checkIn, bookings[i].checkOut,
+           totalAmount, // Use the returned value here
            bookings[i].status ? "Active" : "Completed");
   }
 }
