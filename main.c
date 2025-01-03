@@ -862,7 +862,8 @@ void makeBooking() {
 
 void viewBookings() {
   printf("\nBooking List\n");
-  printf("ID\tRoom\tCheck-in\tCheck-out\tAmount\tStatus\n");
+  printf("%-4s\t%-4s\t%-10s\t%-10s\t%-6s\t%s\n", "ID", "Room", "Check-in",
+         "Check-out", "Amount", "Status");
   for (int i = 0; i < bookingCount; i++) {
     if (strcmp(currentUser.role, "customer") == 0 &&
         bookings[i].userId != currentUser.id) {
@@ -876,11 +877,12 @@ void viewBookings() {
 
 void viewCustomers() {
   printf("\nCustomer List\n");
-  printf("ID\tName\tEmail\tPhone\tAddress\n");
+  printf("%-5s%-20s%-30s%-15s%-20s\n", "ID", "Name", "Email", "Phone",
+         "Address");
   for (int i = 0; i < userCount; i++) {
     if (strcmp(users[i].role, "customer") == 0) {
-      printf("%d\t%s\t%s\t%s\t%s\n", users[i].id, users[i].name, users[i].email,
-             users[i].phone, users[i].address);
+      printf("%-5d%-20s%-30s%-15s%-20s\n", users[i].id, users[i].name,
+             users[i].email, users[i].phone, users[i].address);
     }
   }
 }
